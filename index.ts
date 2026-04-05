@@ -1,3 +1,4 @@
+#!/usr/bin/env bun
 import { cmdClean } from "./commands/clean.ts";
 import { cmdHistory } from "./commands/history.ts";
 import { cmdList } from "./commands/list.ts";
