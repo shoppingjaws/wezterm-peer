@@ -1,8 +1,11 @@
 {
-	"name": "template-bun",
+	"name": "wezterm-peer",
 	"module": "index.ts",
 	"type": "module",
 	"private": true,
+	"bin": {
+		"peer": "index.ts"
+	},
   "scripts": {
     "test": "docker build -f Dockerfile.test -t template-bun-test . && docker run --rm template-bun-test",
     "format": "biome format --write",
