@@ -25,14 +25,30 @@ switch (command) {
 		await cmdPeek(paneId, args.slice(1));
 		break;
 	}
-	case "send": {
-		const paneId = args[0];
-		const message = args.slice(1).join(" ");
-		if (!paneId || !message) {
-			console.error("Usage: peer send <pane-id> <message>");
-			process.exit(1);
+	case "inbox": {
+		const subcommand = args[0];
+		switch (subcommand) {
+			case "send": {
+				const paneId = args[1];
+				const message = args.slice(2).join(" ");
+				if (!paneId || !message) {
+					console.error("Usage: peer inbox send <pane-id> <message>");
+					process.exit(1);
+				}
+				await cmdSend(paneId, message);
+				break;
+			}
+			case "open":
+				cmdOpen();
+				break;
+			default:
+				console.log("Usage: peer inbox <open|send>");
+				console.log("");
+				console.log("Subcommands:");
+				console.log("  open                   Show and mark as read unread messages");
+				console.log("  send <pane-id> <msg>   Send a message to a pane");
+				process.exit(subcommand ? 1 : 0);
 		}
-		await cmdSend(paneId, message);
 		break;
 	}
 	case "new-pane":
@@ -41,9 +57,6 @@ switch (command) {
 	case "new-tab":
 		await cmdNewTab(args);
 		break;
-	case "open":
-		cmdOpen();
-		break;
 	case "history":
 		cmdHistory(args[0]);
 		break;
@@ -51,15 +64,14 @@ switch (command) {
 		cmdClean();
 		break;
 	default:
-		console.log("Usage: peer <list|peek|send|new-pane|new-tab|open|history|clean>");
+		console.log("Usage: peer <list|peek|inbox|new-pane|new-tab|history|clean>");
 		console.log("");
 		console.log("Commands:");
 		console.log("  list                   List panes (same tab + peer group)");
 		console.log("  peek <pane-id>         Read terminal text from a pane");
-		console.log("  send <pane-id> <msg>   Send a message to a pane");
+		console.log("  inbox <open|send>      Manage inbox messages");
 		console.log("  new-pane [opts] [-- cmd]  Split a new pane in current tab");
 		console.log("  new-tab  [opts] [-- cmd]  Spawn a new tab and add to peer group");
-		console.log("  open                   Show and mark as read unread messages");
 		console.log("  history [pane-id]      Show message history");
 		console.log("  clean                  Reset the message database");
 		process.exit(command ? 1 : 0);
