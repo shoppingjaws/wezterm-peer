@@ -24,11 +24,13 @@ export function initDb(): Database {
 		CREATE INDEX IF NOT EXISTS idx_messages_to_pane ON messages(session_id, to_pane, read_at)
 	`);
 	db.run(`
-		CREATE TABLE IF NOT EXISTS peer_group (
+		CREATE TABLE IF NOT EXISTS peer_edges (
 			session_id TEXT NOT NULL,
-			pane_id TEXT NOT NULL,
+			from_pane_id TEXT NOT NULL,
+			to_pane_id TEXT NOT NULL,
+			relation TEXT NOT NULL CHECK(relation IN ('parent', 'child')),
 			created_at TEXT NOT NULL DEFAULT (datetime('now')),
-			PRIMARY KEY (session_id, pane_id)
+			PRIMARY KEY (session_id, from_pane_id, to_pane_id)
 		)
 	`);
 	return db;

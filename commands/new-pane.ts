@@ -1,6 +1,10 @@
 import { $ } from "bun";
+import { initDb } from "../db.ts";
+import { getMyPaneId, registerPeerEdge } from "../pane.ts";
 
 export async function cmdNewPane(args: string[]) {
+	const myPaneId = getMyPaneId();
+
 	const splitArgs: string[] = [];
 	let commandArgs: string[] = [];
 
@@ -25,5 +29,9 @@ export async function cmdNewPane(args: string[]) {
 		process.exit(1);
 	}
 
-	console.log(`Created pane ${newPaneId}.`);
+	const db = initDb();
+	registerPeerEdge(db, myPaneId, newPaneId, "child");
+	db.close();
+
+	console.log(`Created pane ${newPaneId} and added to peer group.`);
 }

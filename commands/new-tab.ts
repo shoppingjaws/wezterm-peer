@@ -1,6 +1,6 @@
 import { $ } from "bun";
 import { initDb } from "../db.ts";
-import { getMyPaneId, registerPeer } from "../pane.ts";
+import { getMyPaneId, registerPeerEdge } from "../pane.ts";
 
 export async function cmdNewTab(args: string[]) {
 	const myPaneId = getMyPaneId();
@@ -30,8 +30,7 @@ export async function cmdNewTab(args: string[]) {
 	}
 
 	const db = initDb();
-	registerPeer(db, myPaneId);
-	registerPeer(db, newPaneId);
+	registerPeerEdge(db, myPaneId, newPaneId, "child");
 	db.close();
 
 	console.log(`Created tab with pane ${newPaneId} and added to peer group.`);

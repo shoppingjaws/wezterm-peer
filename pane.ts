@@ -61,15 +61,40 @@ export async function getTabPaneIds(): Promise<Set<number>> {
 
 export function getPeerGroupPaneIds(db: import("bun:sqlite").Database): Set<string> {
 	const sessionId = getSessionId();
+	const myPaneId = getMyPaneId();
 	const rows = db
-		.prepare("SELECT pane_id FROM peer_group WHERE session_id = ?")
-		.all(sessionId) as Array<{ pane_id: string }>;
-	return new Set(rows.map((r) => r.pane_id));
+		.prepare("SELECT DISTINCT to_pane_id FROM peer_edges WHERE session_id = ? AND from_pane_id = ?")
+		.all(sessionId, myPaneId) as Array<{ to_pane_id: string }>;
+	return new Set(rows.map((r) => r.to_pane_id));
 }
 
-export function registerPeer(db: import("bun:sqlite").Database, paneId: string) {
+export type PeerRelation = "parent" | "child";
+
+export function registerPeerEdge(db: import("bun:sqlite").Database, fromPaneId: string, toPaneId: string, relation: PeerRelation) {
 	const sessionId = getSessionId();
+	const reverseRelation: PeerRelation = relation === "child" ? "parent" : "child";
 	db.prepare(
-		"INSERT OR IGNORE INTO peer_group (session_id, pane_id) VALUES (?, ?)",
-	).run(sessionId, paneId);
+		"INSERT OR IGNORE INTO peer_edges (session_id, from_pane_id, to_pane_id, relation) VALUES (?, ?, ?, ?)",
+	).run(sessionId, fromPaneId, toPaneId, relation);
+	db.prepare(
+		"INSERT OR IGNORE INTO peer_edges (session_id, from_pane_id, to_pane_id, relation) VALUES (?, ?, ?, ?)",
+	).run(sessionId, toPaneId, fromPaneId, reverseRelation);
+}
+
+export function getPeerRelation(db: import("bun:sqlite").Database, paneId: string): PeerRelation | null {
+	const sessionId = getSessionId();
+	const myPaneId = getMyPaneId();
+	const row = db
+		.prepare("SELECT relation FROM peer_edges WHERE session_id = ? AND from_pane_id = ? AND to_pane_id = ?")
+		.get(sessionId, myPaneId, paneId) as { relation: PeerRelation } | null;
+	return row?.relation ?? null;
+}
+
+export function getPaneIdsByRelation(db: import("bun:sqlite").Database, relation: PeerRelation): string[] {
+	const sessionId = getSessionId();
+	const myPaneId = getMyPaneId();
+	const rows = db
+		.prepare("SELECT to_pane_id FROM peer_edges WHERE session_id = ? AND from_pane_id = ? AND relation = ?")
+		.all(sessionId, myPaneId, relation) as Array<{ to_pane_id: string }>;
+	return rows.map((r) => r.to_pane_id);
 }

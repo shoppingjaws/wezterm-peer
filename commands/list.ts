@@ -1,5 +1,5 @@
 import { initDb } from "../db.ts";
-import { getMyPaneId, getPeerGroupPaneIds, listPanes } from "../pane.ts";
+import { getMyPaneId, getPeerGroupPaneIds, getPeerRelation, listPanes } from "../pane.ts";
 
 export async function cmdList() {
 	const myPaneId = getMyPaneId();
@@ -12,7 +12,6 @@ export async function cmdList() {
 
 	const db = initDb();
 	const peerPaneIds = getPeerGroupPaneIds(db);
-	db.close();
 
 	const sameTabIds = new Set(
 		panes.filter((p) => p.tab_id === myPane.tab_id).map((p) => p.pane_id),
@@ -22,11 +21,15 @@ export async function cmdList() {
 		(p) => sameTabIds.has(p.pane_id) || peerPaneIds.has(String(p.pane_id)),
 	);
 
-	console.log("WINID\tTABID\tPANEID\tWORKSPACE\tSIZE\tTITLE");
+	console.log("WINID\tTABID\tPANEID\tRELATION\tWORKSPACE\tSIZE\tTITLE");
 	for (const p of visiblePanes) {
-		const marker = p.pane_id === Number(myPaneId) ? " *" : "";
+		const relation = p.pane_id === Number(myPaneId)
+			? "self"
+			: (getPeerRelation(db, String(p.pane_id)) ?? "none");
 		console.log(
-			`${p.window_id}\t${p.tab_id}\t${p.pane_id}${marker}\t${p.workspace}\t${p.size}\t${p.title}`,
+			`${p.window_id}\t${p.tab_id}\t${p.pane_id}\t${relation}\t${p.workspace}\t${p.size}\t${p.title}`,
 		);
 	}
+
+	db.close();
 }
