@@ -24,8 +24,9 @@ export async function cmdList() {
 
 	console.log("WINID\tTABID\tPANEID\tWORKSPACE\tSIZE\tTITLE");
 	for (const p of visiblePanes) {
+		const marker = p.pane_id === Number(myPaneId) ? " *" : "";
 		console.log(
-			`${p.window_id}\t${p.tab_id}\t${p.pane_id}\t${p.workspace}\t${p.size}\t${p.title}`,
+			`${p.window_id}\t${p.tab_id}\t${p.pane_id}${marker}\t${p.workspace}\t${p.size}\t${p.title}`,
 		);
 	}
 }
