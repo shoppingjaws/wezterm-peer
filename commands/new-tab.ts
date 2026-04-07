@@ -7,13 +7,25 @@ export async function cmdNewTab(args: string[]) {
 
 	const spawnArgs: string[] = [];
 	let commandArgs: string[] = [];
+	let description: string | undefined;
 
-	const separatorIndex = args.indexOf("--");
+	// Extract --description option before separator processing
+	const filteredArgs: string[] = [];
+	for (let i = 0; i < args.length; i++) {
+		if (args[i] === "--description" && i + 1 < args.length) {
+			description = args[i + 1]!;
+			i++;
+		} else {
+			filteredArgs.push(args[i]!);
+		}
+	}
+
+	const separatorIndex = filteredArgs.indexOf("--");
 	if (separatorIndex >= 0) {
-		spawnArgs.push(...args.slice(0, separatorIndex));
-		commandArgs = args.slice(separatorIndex + 1);
+		spawnArgs.push(...filteredArgs.slice(0, separatorIndex));
+		commandArgs = filteredArgs.slice(separatorIndex + 1);
 	} else {
-		spawnArgs.push(...args);
+		spawnArgs.push(...filteredArgs);
 	}
 
 	if (commandArgs.length > 0) {
@@ -30,7 +42,7 @@ export async function cmdNewTab(args: string[]) {
 	}
 
 	const db = initDb();
-	registerPeerEdge(db, myPaneId, newPaneId, "child");
+	registerPeerEdge(db, myPaneId, newPaneId, "child", description);
 	db.close();
 
 	console.log(`Created tab with pane ${newPaneId} and added to peer group.`);

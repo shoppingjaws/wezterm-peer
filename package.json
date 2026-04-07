@@ -1,20 +1,39 @@
 {
-	"name": "wezterm-peer",
-	"module": "index.ts",
+	"name": "@shoppingjaws/peer",
+	"version": "0.1.1",
+	"description": "CLI tool for managing wezterm panes, peer groups, and inter-pane messaging",
 	"type": "module",
-	"private": true,
 	"bin": {
-		"peer": "index.ts"
+		"peer": "dist/index.js"
 	},
-  "scripts": {
-    "build": "bun build index.ts --outdir dist --target bun",
-    "test": "docker build -f Dockerfile.test -t template-bun-test . && docker run --rm template-bun-test",
-    "format": "biome format --write",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "bun build index.ts --outdir dist --target bun",
+		"prepublishOnly": "bun run build",
+		"test": "docker build -f Dockerfile.test -t template-bun-test . && docker run --rm template-bun-test",
+		"format": "biome format --write",
 		"format:check": "biome format",
 		"lint": "biome lint --fix",
 		"lint:check": "biome lint",
 		"typecheck": "tsc --noEmit"
-  },
+	},
+	"keywords": [
+		"wezterm",
+		"terminal",
+		"pane",
+		"cli"
+	],
+	"author": "ShoppingJaws",
+	"license": "MIT",
+	"publishConfig": {
+		"access": "public"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/shoppingjaws/wezterm-peer.git"
+	},
 	"devDependencies": {
 		"@types/bun": "latest"
 	},

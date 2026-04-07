@@ -29,9 +29,15 @@ export function initDb(): Database {
 			from_pane_id TEXT NOT NULL,
 			to_pane_id TEXT NOT NULL,
 			relation TEXT NOT NULL CHECK(relation IN ('parent', 'child')),
+			description TEXT DEFAULT NULL,
 			created_at TEXT NOT NULL DEFAULT (datetime('now')),
 			PRIMARY KEY (session_id, from_pane_id, to_pane_id)
 		)
 	`);
+	// Migration: add description column if missing
+	const columns = db.prepare("PRAGMA table_info(peer_edges)").all() as Array<{ name: string }>;
+	if (!columns.some((c) => c.name === "description")) {
+		db.run("ALTER TABLE peer_edges ADD COLUMN description TEXT DEFAULT NULL");
+	}
 	return db;
 }

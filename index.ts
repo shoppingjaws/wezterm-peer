@@ -70,8 +70,8 @@ switch (command) {
 		console.log("  list                   List panes (same tab + peer group)");
 		console.log("  peek <pane-id>         Read terminal text from a pane");
 		console.log("  inbox <open|send>      Manage inbox messages");
-		console.log("  new-pane [opts] [-- cmd]  Split a new pane in current tab");
-		console.log("  new-tab  [opts] [-- cmd]  Spawn a new tab and add to peer group");
+		console.log("  new-pane [opts] [--description text] [-- cmd]  Split a new pane");
+		console.log("  new-tab  [opts] [--description text] [-- cmd]  Spawn a new tab");
 		console.log("  history [pane-id]      Show message history");
 		console.log("  clean                  Reset the message database");
 		process.exit(command ? 1 : 0);

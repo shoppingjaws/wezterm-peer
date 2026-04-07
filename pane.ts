@@ -70,15 +70,15 @@ export function getPeerGroupPaneIds(db: import("bun:sqlite").Database): Set<stri
 
 export type PeerRelation = "parent" | "child";
 
-export function registerPeerEdge(db: import("bun:sqlite").Database, fromPaneId: string, toPaneId: string, relation: PeerRelation) {
+export function registerPeerEdge(db: import("bun:sqlite").Database, fromPaneId: string, toPaneId: string, relation: PeerRelation, description?: string) {
 	const sessionId = getSessionId();
 	const reverseRelation: PeerRelation = relation === "child" ? "parent" : "child";
 	db.prepare(
-		"INSERT OR IGNORE INTO peer_edges (session_id, from_pane_id, to_pane_id, relation) VALUES (?, ?, ?, ?)",
-	).run(sessionId, fromPaneId, toPaneId, relation);
+		"INSERT OR IGNORE INTO peer_edges (session_id, from_pane_id, to_pane_id, relation, description) VALUES (?, ?, ?, ?, ?)",
+	).run(sessionId, fromPaneId, toPaneId, relation, description ?? null);
 	db.prepare(
-		"INSERT OR IGNORE INTO peer_edges (session_id, from_pane_id, to_pane_id, relation) VALUES (?, ?, ?, ?)",
-	).run(sessionId, toPaneId, fromPaneId, reverseRelation);
+		"INSERT OR IGNORE INTO peer_edges (session_id, from_pane_id, to_pane_id, relation, description) VALUES (?, ?, ?, ?, ?)",
+	).run(sessionId, toPaneId, fromPaneId, reverseRelation, description ?? null);
 }
 
 export function getPeerRelation(db: import("bun:sqlite").Database, paneId: string): PeerRelation | null {
@@ -88,6 +88,15 @@ export function getPeerRelation(db: import("bun:sqlite").Database, paneId: strin
 		.prepare("SELECT relation FROM peer_edges WHERE session_id = ? AND from_pane_id = ? AND to_pane_id = ?")
 		.get(sessionId, myPaneId, paneId) as { relation: PeerRelation } | null;
 	return row?.relation ?? null;
+}
+
+export function getPeerDescription(db: import("bun:sqlite").Database, paneId: string): string | null {
+	const sessionId = getSessionId();
+	const myPaneId = getMyPaneId();
+	const row = db
+		.prepare("SELECT description FROM peer_edges WHERE session_id = ? AND from_pane_id = ? AND to_pane_id = ?")
+		.get(sessionId, myPaneId, paneId) as { description: string | null } | null;
+	return row?.description ?? null;
 }
 
 export function getPaneIdsByRelation(db: import("bun:sqlite").Database, relation: PeerRelation): string[] {
